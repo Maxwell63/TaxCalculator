@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <title>Income Tax Calculator</title>
+        
+        <style>
+            *{
+                font-family: Helvetica, sans-serif;
+            }
+            
+                        
+            #wrapper {
+                margin-left: 100px;
+                margin-right: 100px;
+              }
+            
+            div.input{
+                
+                width: 100%;
+                background: #D9D9D9;
+                padding-bottom: 5px;
+                
+            }
+            
+            div.output{
+                width : 100%; 
+                background: #D9D9D9;
+                border-width:5px;  
+                border-style:ridge;
+            }
+            
+            table.output td.annual{
+                
+            }
+            
+            table.output td.monthly{
+                
+            }
+            
+
+            
+            table.output td{  
+                padding-top : 5px;
+                padding-bottom: 5px;
+                padding-left: 5px;
+                border: 1px solid black;
+            }
+             table.output th{
+                padding-top : 5px;
+                padding-bottom: 5px;
+                padding-left: 5px;
+                border-style: double;
+                font-size: 20px;
+            }
+            
+            table.output{
+                width: 100%;
+            }
+            
+            div.input #input{
+                border : 2px solid gray;
+            }
+            
+            .form_div{
+                display : block;
+                margin: 5px;
+            }
+            
+            select, input {
+                width : 250px;
+                height: 30px;
+                text-align: left;
+            }
+            
+            label {
+                width : 400px;
+                text-align: right;
+            }
+            
+            table.rates{
+                width:100%;
+               
+                margin-bottom: 20px;
+            }
+            
+            
+            table.rates:nth-child(odd) {
+                /**background-color: gray;*/
+            }
+            
+            table.rates th, td{
+                /**background-color: gray;*/
+                padding-top: 5px;
+                padding-bottom: 5px;
+                padding-left: 5px;
+            }
+            
+            table.rates th{
+                /**background-color: gray;*/
+                
+                text-align: center;
+                background-color: #136161;
+                color: white;
+                border : 1px solid white;
+            }
+            
+            table.rates td{
+                /**background-color: gray;*/
+                border : 1px solid gray;
+                
+            }
+            
+            h3{
+                width: 100%;
+                color: white;
+                background-color: black;
+                text-align: center;
+                padding : 2px;
+                font-weight: bold;
+            }
+            
+            h1{
+                text-align: center;
+            }
+
+              
+              a{
+                  float: right;
+                  color: white;
+                  cursor: pointer;
+                  font-size: 10px;
+              }
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+        <h1>Work out Salary Tax (PAYE), Taxable Income and Tax Rates</h1>
+        <div id="input" >
+            <h3>INCOME</h3>
+
+            <div class ="form_div">
+                <label>Which Tax Year would you like to calculate?</label>
+                <select id="tax_year">
+                  <option value="2018">2018 (MAR 2017 - FEB 2018)</option>
+                  <option value="2017">2017 (MAR 2016 - FEB 2017)</option>
+                </select>
+            </div>
+            
+            <div class ="form_div">
+                <label>What is your Total (Gross) Salary before Deductions?</label>
+                <input type="number" id="taxable_earnings" name="taxable_earnings" />
+            </div>
+
+            <div class ="form_div">
+                <label>How often do you receive this salary?</label>
+                <select id="frequency">
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Annually</option>
+                </select>
+            </div>
+
+            <div class ="form_div">
+                <label>Your age?</label>
+                <select id="age">
+                    <option value="1">Under 65</option>
+                    <option value="2">65 - 75</option>
+                    <option value="3">Over 75</option>
+                </select>
+            </div>
+            
+            <div class ="form_div">
+                <label>How many Main + Members are in your Medical Aid?</label>
+                <input type="number" id="medical_aid" name="medical_aid" />
+            </div>
+
+            <button type="button" class="btn btn-danger" onclick="calculateTax();">CALCULATE</button>
+        </div>
+        
+        <div class="ouput" >
+            <h3 class="heading">BREAKDOWN FOR TAX YEAR <span class="year"></span> <a id="close" onclick="toggleShow();">Open</a></h3>
+            
+            <table class="output" id="tax_output" align="center" style="display: none;">
+                
+                <tbody>
+                    <tr>
+                        <td rowspan="2">GROSS INCOME</td>
+                        <td class="annual">ANNUALLY</td>
+                        <td id="gross_annual">R 0</td>
+                    </tr>
+                     <tr>
+                        <td class="monthly">MONTHLY</td>
+                        <td id="gross_monthly">R 0</td>
+                    </tr>
+                    
+                    <tr>
+                        <td rowspan="2">PAYE BEFORE TAX CREDITS</td>
+                        <td class="annual">ANNUALLY</td>
+                        <td id="paye_before_tax_credits_yearly">R 0</td>
+                    </tr>  
+                    <tr>
+                        <td class="monthly">MONTHLY</td>
+                        <td id="paye_before_tax_credits_monthly">R 0</td>
+                    </tr> 
+                    
+                    <tr>
+                        <td colspan="2">TAX CREDITS</td>
+                        <td id="tax_credits">R 0</td>
+                    </tr>
+                    
+                    <tr>
+                        <td colspan="2">PAYE DUE MONTHLY</td>
+                        <td id="tax_due" style="font-weight:bold;">R 0</td>
+                    </tr>
+                    
+                    <tr>
+                        <th colspan="2">TAKE HOME PAY</th>
+                        <th id="net">R 0</th>
+                    </tr>                    
+                    
+                 <tbody>
+            </table>   
+            
+            <div style="width: 100%; display:none;" id="rates_tables">
+            <h4 style="margin-top: 20px;">TAX YEAR <span class="year"></span> <br>INDIVIDUAL AND SPECIAL TRUSTS</h4>
+            
+            <table class="rates" id="tax_rates" align="center">
+                <thead>
+                    <tr>
+                        <th colspan="2">TAXABLE RATES</th>
+                    </tr>
+                    <tr>
+                        <th>INCOME</th>
+                        <th>RATE OF TAX</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+
+                 <tbody>
+            </table>
+            
+            <table class="rates" id="rebates" align="center">
+                <thead>
+                    <tr>
+                        <th colspan="2">TAX REBATE</th>
+                    </tr>
+                </thead>
+                 <tbody>
+                    
+                </tbody>               
+            </table>
+            
+            <table class="rates"  id="thresholds" align="center">
+                <thead>
+                    <tr>
+                        <th colspan="2">TAX THRESHOLDS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+            
+              <table class="rates"  id="medical_aid" align="center">
+                <thead>
+                    <tr>
+                        <th colspan="2">MEDICAL AID</th>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <tr>
+                        <td style="width:50%;">Main Member</td>
+                        <td style="width:50%;" id="main_member"></td>
+                    </tr>
+                     <tr>
+                        <td style="width:50%;">First Dependant</td>
+                        <td style="width:50%;" id="first_dep"></td>
+                    </tr>
+                    <tr>
+                        <td style="width:50%;">Additional Dependant(s)</td>
+                        <td style="width:50%;" id="add_dep"></td>
+                    </tr>                    
+                </tbody>
+            </table>   
+            </div>
+        </div>
+        
+        </div>
+
+            
+        <script>
+            $(document).ready(function () {
+
+            });        
+            
+            shown = false;
+            
+            function toggleShow(){
+                //$('#tax_output').show();
+                
+                if (!shown){
+                    $('#tax_output').show();
+                    $('#rates_tables').show();
+                    $('#close').html("Close");
+                    
+                } else {
+                    $('#tax_output').hide();
+                    $('#rates_tables').hide();
+                    $('#close').html("Open");
+                    
+                }
+                
+                shown = !shown;
+            }
+            
+            function calculateTax(){                
+                //$("#tax_year option:selected").val();               
+                var year = parseInt($("#tax_year").val());
+                              
+                var salary = $("#taxable_earnings").val();
+
+                var frequency = $("#frequency").val();
+
+                var age  = $("#age").val();
+
+                var med_aid = $("#medical_aid").val();                   
+                    
+                //get tax year
+                var annual_salary = 0;
+                if (frequency == "monthly"){
+                   annual_salary = parseInt(salary)*12; 
+                } else if (frequency == "yearly"){
+                    annual_salary = parseInt(salary); 
+                }
+                                
+                var user_age;
+                if (age == "1"){
+                    user_age = "Below age 65";
+                } else if (age == "2"){
+                    user_age = "Age 65 to 75";
+                } else if (age == "3"){
+                    user_age = "Age 75 and over";
+                }
+                //console.log("Age : "+ user_age);
+                
+                //console.log("Medical Aid Users: " + parseInt(med_aid))
+                
+                var med_aid_memebers = parseInt(med_aid);
+                
+                if (isNaN(parseInt(salary))){
+                    alert("Enter a Valid Salary!");
+                } else if (isNaN(parseInt(med_aid))) {
+                    alert("Enter a Valid number of Medical Aid Members!");
+                } else {
+                    $.ajax({
+                       type: "GET",
+                       url: "TaxCalculator/TaxCalculatorServlet",
+                       data: {salary: annual_salary, age : parseInt(age), medical_aid: parseInt(med_aid), year : year},
+                       success: function (data) {
+                           
+                           console.log(data);
+                           
+                           $('.year').html(year);
+                           $('#gross_annual').html('R ' + annual_salary.toFixed(2));
+                           $('#gross_monthly').html('R ' + (annual_salary/12).toFixed(2) );
+                           
+                           if (annual_salary > data.threshold.threshold_amount){
+                               //var tax_percentage =  
+                               var taxable_amount = annual_salary - data.taxableIncome.base_for_tax_percentage;
+                               //console.log('Difference: ' + taxable_amount);
+                               
+                               var taxabale_amount_tax = taxable_amount * data.taxableIncome.tax_percentage /100;
+                               //console.log('Tax Base Taxable: ' + taxabale_amount_tax);
+                               
+                               var total_tax_before_credits = taxabale_amount_tax  + data.taxableIncome.base_tax_payable;
+                               //console.log('Tax Before Credits: '+ total_tax_before_credits);
+                               
+                               $('#paye_before_tax_credits_yearly').html('R ' + total_tax_before_credits);
+                               $('#paye_before_tax_credits_monthly').html('R ' + (total_tax_before_credits/12).toFixed(2));
+                               
+                                var tax_credits = 0;
+                               if (med_aid_memebers == 0){
+                                   tax_credits = 0;
+                                   
+                               } else if (med_aid_memebers == 1){
+                                   var main = data.medical_aid_credits.main_member;
+                                   
+                                   tax_credits = main;
+                               } else if (med_aid_memebers == 2){
+                                   var main = data.medical_aid_credits.main_member;
+                                   var first = data.medical_aid_credits.first_dependant;
+                                                                      
+                                   tax_credits = main + first;
+                                   
+                               } else {
+                                   var main = data.medical_aid_credits.main_member;
+                                   var first = data.medical_aid_credits.first_dependant;
+                                   var additional = (med_aid_memebers - 2) * data.medical_aid_credits.add_members;
+                                   
+                                   tax_credits = main + first + additional;
+                               }
+                               
+                               $('#tax_credits').html('R '+tax_credits.toFixed(2));
+                               
+                               var tax_due = total_tax_before_credits - tax_credits;
+                               
+                               $('#tax_due').html('R '+(tax_due/12).toFixed(2));
+                               
+                               var net = (annual_salary/12 - tax_due/12).toFixed(2)
+                               
+                               $('#net').html('R ' + net);
+                               
+                               fillTables(data.model);
+                               
+                               $('#close').html('Close');
+                               $('#tax_output').show();
+                               $('#rates_tables').show();
+                           } else {
+                               alert('You do not qualify to pay tax.');
+                           }
+                       }
+                   });                   
+                }
+                                
+            }
+            
+            function fillTables(data){
+                $('#tax_rates tbody').empty();
+                for (var key in data.taxableIncome){
+                    if (data.taxableIncome.hasOwnProperty(key)){
+                        var above = '';
+                        
+                        if (data.taxableIncome[key].base_for_tax_percentage == 0){
+                            above = '';
+                        } else {
+                            above = ' above R ' + data.taxableIncome[key].base_for_tax_percentage;
+                        }
+                        
+                        var bracket = '';
+                        
+                        if (data.taxableIncome[key].max_income == 2147483647){
+                            bracket = data.taxableIncome[key].min_income + ' and above';
+                        } else {
+                            bracket = data.taxableIncome[key].min_income + ' to ' + data.taxableIncome[key].max_income;
+                        }
+                        
+                        $('#tax_rates').append('<tr><td style="width:50%;">'+ bracket + '</td><td style="width:50%;">R '+data.taxableIncome[key].base_tax_payable + ' + ' + data.taxableIncome[key].tax_percentage + '% of taxable income ' + above + '</td></tr>');
+                    }
+                }
+                
+                //console.log($('#medical_aid'));
+                
+                $('#main_member').html('R ' + data.medicalAid.main_member);
+                $('#first_dep').html('R ' + data.medicalAid.first_dependant);
+                $('#add_dep').html('R ' + data.medicalAid.add_members);
+                
+                $('#rebates tbody').empty();
+                $('#rebates').append('<tr><td style="width:50%;">Primary</td><td style="width:50%;">R '+data.rebates[1].rebate_amount+'</td></tr>');
+                $('#rebates').append('<tr><td style="width:50%;">Secondary (Persons 65 and older)</td><td style="width:50%;">R '+data.rebates[2].rebate_amount+'</td></tr>');
+                $('#rebates').append('<tr><td style="width:50%;">Tertiary (Persons 75 and older)</td><td style="width:50%;">R '+data.rebates[3].rebate_amount+'</td></tr>');
+
+                $('#thresholds tbody').empty();
+                $('#thresholds').append('<tr><td style="width:50%;">Below age 65</td><td style="width:50%;">R '+data.thresholds[1].threshold_amount+'</td></tr>');
+                $('#thresholds').append('<tr><td style="width:50%;">Age 65 to 75</td><td style="width:50%;">R '+data.thresholds[2].threshold_amount+'</td></tr>');
+                $('#thresholds').append('<tr><td style="width:50%;">Age 75 and over</td><td style="width:50%;">R '+data.thresholds[3].threshold_amount+'</td></tr>');
+            }
+        </script>
+        
+    </body>
+</html>
